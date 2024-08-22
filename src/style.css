@@ -1,0 +1,75 @@
+:root {
+	--wall-style: 1px solid #1f2937;
+	--cell-background: #059669;
+	--path-background: #065f46;
+	--start-path-background: #ef4444;
+	--finish-path-background: #030712;
+}
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+#app {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+}
+.maze {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	grid-template-rows: repeat(7, 1fr);
+	width: 500px;
+	height: 500px;
+	border: var(--wall);
+
+	--wall: 1px solid black;
+}
+.maze .cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--cell-background);
+}
+.cell.wall-top {
+	border-top: var(--wall);
+}
+.cell.wall-right {
+	border-right: var(--wall);
+}
+.cell.wall-down {
+	border-bottom: var(--wall);
+}
+.cell.wall-left {
+	border-left: var(--wall);
+}
+.cell .path {
+	width: 15px;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background: var(--path-background);
+}
+.path.start {
+	border: 2px solid white;
+	background: var(--start-path-background);
+}
+.path.finish {
+	border: 2px solid white;
+	background: var(--finish-path-background);
+}
+.cell.wall-top-hit {
+	border-top: 1px solid red !important;
+}
+.cell.wall-right-hit {
+	border-right: 1px solid red !important;
+}
+.cell.wall-down-hit {
+	border-bottom: 1px solid red !important;
+}
+.cell.wall-left-hit {
+	border-left: 1px solid red !important;
+}
+.maze.hide > .cell {
+	border: 0;
+}
