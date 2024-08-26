@@ -120,7 +120,7 @@ export class Maze {
 		// this.init();
 	}
 	checkGameState() {
-		if (this.checkIsWinTheGame()) this.gameOver(true);
+		if (this.checkIsWinTheGame()) this.gameOver();
 	}
 	movePlayer(event: KeyboardEvent) {
 		if (!this.isMoveable) return;
