@@ -112,7 +112,7 @@ export class Maze {
 		this.hearts -= 1;
 		return this.hearts === 0;
 	}
-	gameOver(isWin: boolean = false) {
+	gameOver() {
 		this.isMoveable = false;
 		this.mazeElement.classList.remove("hide");
 		// const message = isWin ? "You Win!" : "Game Over! Try again?";
