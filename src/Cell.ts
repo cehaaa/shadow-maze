@@ -1,12 +1,12 @@
-import { Direction } from "./types";
+import { Wall } from "./types";
 
 export class Cell {
 	player: boolean;
-	destination: boolean;
 	visited: boolean;
-	walls: Record<Direction, boolean>;
-	hitWalls: Record<Direction, boolean>;
+	destination: boolean;
 	mazeElement: HTMLDivElement;
+	walls: Record<Wall, boolean>;
+	impactedWalls: Record<Wall, boolean>;
 
 	constructor() {
 		this.player = false;
@@ -15,16 +15,28 @@ export class Cell {
 		this.walls = {
 			up: true,
 			right: true,
-			down: true,
+			bottom: true,
 			left: true,
 		};
-		this.hitWalls = {
+		this.impactedWalls = {
 			up: false,
 			right: false,
-			down: false,
+			bottom: false,
 			left: false,
 		};
 		this.mazeElement = document.querySelector<HTMLDivElement>(".maze")!;
+	}
+	drawSpecialPath() {
+		const specialPath = document.createElement("div");
+		specialPath.classList.add("special-path");
+		if (this.player) {
+			specialPath.classList.add("player");
+			return specialPath;
+		}
+		if (this.destination) {
+			specialPath.classList.add("destination");
+			return specialPath;
+		}
 	}
 	drawCell() {
 		const cell = document.createElement("div");
@@ -33,20 +45,20 @@ export class Cell {
 		const path = document.createElement("div");
 		path.classList.add("path");
 
-		if (this.player) path.classList.add("start");
-		if (this.destination) path.classList.add("finish");
-
-		if (this.hitWalls.up) cell.classList.add("wall-top-hit");
-		if (this.hitWalls.down) cell.classList.add("wall-down-hit");
-		if (this.hitWalls.right) cell.classList.add("wall-right-hit");
-		if (this.hitWalls.left) cell.classList.add("wall-left-hit");
+		if (this.impactedWalls.up) cell.classList.add("top-wall-impacted");
+		if (this.impactedWalls.right) cell.classList.add("right-wall-impacted");
+		if (this.impactedWalls.bottom) cell.classList.add("bottom-wall-impacted");
+		if (this.impactedWalls.left) cell.classList.add("left-wall-impacted");
 
 		if (this.walls.up) cell.classList.add("wall-top");
 		if (this.walls.right) cell.classList.add("wall-right");
-		if (this.walls.down) cell.classList.add("wall-down");
+		if (this.walls.bottom) cell.classList.add("wall-down");
 		if (this.walls.left) cell.classList.add("wall-left");
 
-		cell.appendChild(path);
+		const specialPath = this.drawSpecialPath();
+		if (specialPath) {
+			cell.appendChild(specialPath);
+		} else cell.appendChild(path);
 
 		this.mazeElement.appendChild(cell);
 	}

@@ -1,9 +1,8 @@
 :root {
-	--wall-style: 1px solid #1f2937;
+	--wall-style: 2px solid #1f2937;
 	--cell-background: #059669;
 	--path-background: #065f46;
-	--start-path-background: #ef4444;
-	--finish-path-background: #030712;
+	--impacted-wall-style: 2px solid #dc2626;
 }
 * {
 	margin: 0;
@@ -18,57 +17,72 @@
 }
 .maze {
 	display: grid;
-	grid-template-columns: repeat(7, 1fr);
-	grid-template-rows: repeat(7, 1fr);
 	width: 500px;
 	height: 500px;
-	border: var(--wall);
-
-	--wall: 1px solid black;
+	grid-template-rows: repeat(7, 1fr);
+	grid-template-columns: repeat(7, 1fr);
+	background: #0284c7;
 }
 .maze .cell {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: var(--cell-background);
 }
 .cell.wall-top {
-	border-top: var(--wall);
+	border-top: var(--wall-style);
 }
 .cell.wall-right {
-	border-right: var(--wall);
+	border-right: var(--wall-style);
 }
 .cell.wall-down {
-	border-bottom: var(--wall);
+	border-bottom: var(--wall-style);
 }
 .cell.wall-left {
-	border-left: var(--wall);
+	border-left: var(--wall-style);
 }
 .cell .path {
 	width: 15px;
 	aspect-ratio: 1;
 	border-radius: 50%;
-	background: var(--path-background);
+	background: #075985;
+	/* background: var(--path-background); */
 }
-.path.start {
+.special-path {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	position: relative;
+}
+.special-path.player {
 	border: 2px solid white;
-	background: var(--start-path-background);
+	background: linear-gradient(90deg, #ef4444, #b91c1c);
 }
-.path.finish {
+.player::before {
+	content: "";
+	position: absolute;
+	border-radius: 50%;
+	width: 40%;
+	height: 40%;
 	border: 2px solid white;
-	background: var(--finish-path-background);
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: linear-gradient(90deg, #ef4444, #b91c1c);
 }
-.cell.wall-top-hit {
-	border-top: 1px solid red !important;
+.special-path.destination {
+	background: linear-gradient(90deg, #52525b, #09090b);
 }
-.cell.wall-right-hit {
-	border-right: 1px solid red !important;
+.cell.top-wall-impacted {
+	border-top: var(--impacted-wall-style) !important;
 }
-.cell.wall-down-hit {
-	border-bottom: 1px solid red !important;
+.cell.right-wall-impacted {
+	border-right: var(--impacted-wall-style) !important;
 }
-.cell.wall-left-hit {
-	border-left: 1px solid red !important;
+.cell.bottom-wall-impacted {
+	border-bottom: var(--impacted-wall-style) !important;
+}
+.cell.left-wall-impacted {
+	border-left: var(--impacted-wall-style) !important;
 }
 .maze.hide > .cell {
 	border: 0;

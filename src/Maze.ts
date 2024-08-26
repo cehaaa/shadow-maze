@@ -1,96 +1,92 @@
-import { Direction, Maze as MazeType } from "./types";
+import {
+	Wall,
+	KeyMap,
+	WallMap,
+	Position,
+	DirectionMap,
+	Maze as MazeType,
+} from "./types";
 import { Cell } from "./Cell";
 import { Utility } from "./Utility";
-import { ROWS, COLUMNS, COUNTDOWN, DIRECTION_MAP } from "./constants";
-
-interface Position {
-	x: number;
-	y: number;
-}
-
-interface GenerateMazeProps {
-	x: number;
-	y: number;
-	maze: MazeType;
-}
+import {
+	ROWS,
+	COLUMNS,
+	KEY_MAP,
+	WALL_MAP,
+	COUNTDOWN,
+	DIRECTION_MAP,
+} from "./constants";
 
 export class Maze {
+	width: number;
+	height: number;
+	keyMap: KeyMap;
+	wallMap: WallMap;
+	countdown: number;
+	directionMap: DirectionMap;
+
 	maze: MazeType;
 	playerPos: Position;
 	destinationPos: Position;
-	height: number;
-	width: number;
-	directionMap: Record<Direction, { dx: number; dy: number }>;
-	hearts: number;
-	countdown: number;
 	isMoveable: boolean;
 	mazeElement: HTMLDivElement;
+	hearts: number;
 
 	constructor() {
 		this.height = ROWS;
 		this.width = COLUMNS;
-		this.directionMap = DIRECTION_MAP;
+		this.keyMap = KEY_MAP;
+		this.wallMap = WALL_MAP;
 		this.countdown = COUNTDOWN;
+		this.directionMap = DIRECTION_MAP;
+
 		this.maze = [];
 		this.playerPos = { x: 0, y: 0 };
 		this.destinationPos = { x: 0, y: 0 };
 		this.isMoveable = false;
 		this.mazeElement = document.querySelector<HTMLDivElement>(".maze")!;
-
 		this.hearts = 3;
 
 		window.addEventListener("keydown", this.movePlayer.bind(this));
 	}
-	generateMaze({ x, y, maze }: GenerateMazeProps) {
-		maze[y][x].visited = true;
 
-		const directions: Direction[] = ["up", "down", "left", "right"];
-		Utility.shuffle(directions);
-
-		for (const direction of directions) {
-			let nx = x + this.directionMap[direction].dx;
-			let ny = y + this.directionMap[direction].dy;
-
-			const isInsideGridAndNotVisited =
-				nx >= 0 &&
-				nx < this.width &&
-				ny >= 0 &&
-				ny < this.height &&
-				!maze[ny][nx].visited;
-
-			if (isInsideGridAndNotVisited) {
-				const current = maze[y][x];
-				const neighbor = maze[ny][nx];
-
-				if (direction === "up") {
-					current.walls.up = false;
-					neighbor.walls.down = false;
-				} else if (direction === "right") {
-					current.walls.right = false;
-					neighbor.walls.left = false;
-				} else if (direction === "down") {
-					current.walls.down = false;
-					neighbor.walls.up = false;
-				} else if (direction === "left") {
-					current.walls.left = false;
-					neighbor.walls.right = false;
-				}
-
-				this.generateMaze({ x: nx, y: ny, maze });
-			}
-		}
-	}
 	createMaze() {
 		const maze: MazeType = Array.from({ length: this.height }, () =>
 			Array.from({ length: this.width }, () => new Cell())
 		);
-
-		this.generateMaze({
-			x: 0,
-			y: 0,
-			maze,
-		});
+		this.generateMaze(0, 0, maze);
 		return maze;
+	}
+	generateMaze(x: number, y: number, maze: MazeType) {
+		maze[y][x].visited = true;
+
+		const directions: Wall[] = ["up", "bottom", "left", "right"];
+		Utility.shuffle(directions);
+
+		for (const direction of directions) {
+			const { dx, dy } = this.directionMap[direction];
+			let nx = x + dx;
+			let ny = y + dy;
+
+			if (this.isValidMazeGenerationCondition(nx, ny, maze)) {
+				this.removeWallBetweenCells(direction, maze[y][x], maze[ny][nx]);
+				this.generateMaze(nx, ny, maze);
+			}
+		}
+	}
+	isValidMazeGenerationCondition(nx: number, ny: number, maze: MazeType) {
+		const isInsideGridAndNotVisited =
+			nx >= 0 &&
+			nx < this.width &&
+			ny >= 0 &&
+			ny < this.height &&
+			!maze[ny][nx].visited;
+		return isInsideGridAndNotVisited;
+	}
+	removeWallBetweenCells(direction: Wall, current: Cell, neighbor: Cell) {
+		const [currentWall, neighborWall] = this.wallMap[direction];
+		current.walls[currentWall] = false;
+		neighbor.walls[neighborWall] = false;
 	}
 	initializeRandomPlayerAndDestination() {
 		let player = Utility.getRandomCoordinate(this.width, this.height);
@@ -103,12 +99,10 @@ export class Maze {
 		this.maze[player.y][player.x].player = true;
 		this.maze[destination.y][destination.x].destination = true;
 
-		return {
-			player,
-			destination,
-		};
+		this.playerPos = player;
+		this.destinationPos = destination;
 	}
-	checkIsWinningALifeGame() {
+	checkIsWinTheGame() {
 		return (
 			this.playerPos.x === this.destinationPos.x &&
 			this.playerPos.y === this.destinationPos.y
@@ -119,67 +113,68 @@ export class Maze {
 		return this.hearts === 0;
 	}
 	gameOver(isWin: boolean = false) {
-		const txt = isWin ? "You Win!" : "Game over! Try again?";
-		confirm(txt) && this.init();
+		this.isMoveable = false;
+		this.mazeElement.classList.remove("hide");
+		// const message = isWin ? "You Win!" : "Game Over! Try again?";
+		// alert(message);
+		// this.init();
+	}
+	checkGameState() {
+		if (this.checkIsWinTheGame()) this.gameOver(true);
 	}
 	movePlayer(event: KeyboardEvent) {
 		if (!this.isMoveable) return;
-		let { x, y } = this.playerPos;
-
 		const { key } = event;
-		const arrows = ["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp"];
-		if (!arrows.includes(key)) return;
 
-		this.maze[y][x].player = false;
+		const { x, y } = this.playerPos;
+		const move = this.keyMap[key];
+		if (!move) return;
 
-		if (key === "ArrowUp") {
-			if (this.maze[y][x].walls.up && y !== 0) {
-				this.maze[y][x].hitWalls.up = true;
-				this.maze[y - 1][x].hitWalls.down = true;
-				if (this.checkIsGameOver()) {
-					this.gameOver();
-					return;
-				}
-			} else y -= 1;
-		} else if (key === "ArrowRight") {
-			if (this.maze[y][x].walls.right && x !== this.width - 1) {
-				this.maze[y][x].hitWalls.right = true;
-				this.maze[y][x + 1].hitWalls.left = true;
-				if (this.checkIsGameOver()) {
-					this.gameOver();
-					return;
-				}
-			} else x += 1;
-		} else if (key === "ArrowDown") {
-			if (this.maze[y][x].walls.down && y !== this.height - 1) {
-				this.maze[y][x].hitWalls.down = true;
-				this.maze[y + 1][x].hitWalls.up = true;
-				if (this.checkIsGameOver()) {
-					this.gameOver();
-					return;
-				}
-			} else y += 1;
-		} else if (key === "ArrowLeft") {
-			if (this.maze[y][x].walls.left && x !== 0) {
-				this.maze[y][x].hitWalls.left = true;
-				this.maze[y][x - 1].hitWalls.right = true;
-				if (this.checkIsGameOver()) {
-					this.gameOver();
-					return;
-				}
-			} else x -= 1;
+		const newX = x + move.dx;
+		const newY = y + move.dy;
+
+		if (this.isValidPlayerMove(x, y, newX, newY, move.wall)) {
+			this.maze[y][x].player = false;
+			this.playerPos = { x: newX, y: newY };
+			this.updatePlayerPosition();
+			this.drawMaze();
+		} else {
+			this.handleCollision(x, y, newX, newY, move.wall);
+			this.drawMaze();
+			if (this.checkIsGameOver()) this.gameOver();
+			return;
 		}
 
-		if (x < 0) x = 0;
-		if (x >= this.width) x = this.width - 1;
-		if (y < 0) y = 0;
-		if (y >= this.height) y = this.height - 1;
-
-		this.playerPos = { x, y };
-		this.maze[this.playerPos.y][this.playerPos.x].player = true;
-
-		this.drawMaze();
-		this.checkIsWinningALifeGame() && this.gameOver(true);
+		this.checkGameState();
+	}
+	isValidPlayerMove(
+		x: number,
+		y: number,
+		newX: number,
+		newY: number,
+		wall: Wall
+	) {
+		const isWall = this.maze[y][x].walls[wall];
+		return this.isNotOutOfBounds(newX, newY) && !isWall;
+	}
+	isNotOutOfBounds(x: number, y: number) {
+		return y >= 0 && y < this.height && x >= 0 && x < this.width;
+	}
+	updatePlayerPosition() {
+		const { x, y } = this.playerPos;
+		this.maze[y][x].player = true;
+	}
+	handleCollision(
+		x: number,
+		y: number,
+		newX: number,
+		newY: number,
+		wall: Wall
+	) {
+		const impactedWall = this.wallMap[wall][1];
+		this.maze[y][x].impactedWalls[wall] = true;
+		if (this.isNotOutOfBounds(newX, newY))
+			this.maze[newY][newX].impactedWalls[impactedWall] = true;
 	}
 	drawMaze() {
 		document.querySelector(".maze")!.innerHTML = "";
@@ -206,12 +201,7 @@ export class Maze {
 		setTimeout(() => {
 			this.mazeElement.classList.add("hide");
 			this.isMoveable = true;
-
-			const { player, destination } =
-				this.initializeRandomPlayerAndDestination();
-
-			this.playerPos = player;
-			this.destinationPos = destination;
+			this.initializeRandomPlayerAndDestination();
 			this.drawMaze();
 		}, this.countdown);
 	}
