@@ -1,8 +1,7 @@
 :root {
 	--wall-style: 2px solid #1f2937;
-	--cell-background: #059669;
-	--path-background: #065f46;
 	--impacted-wall-style: 2px solid #dc2626;
+	--maze-background: #74c1e8;
 }
 * {
 	margin: 0;
@@ -21,7 +20,10 @@
 	height: 500px;
 	grid-template-rows: repeat(7, 1fr);
 	grid-template-columns: repeat(7, 1fr);
-	background: #0284c7;
+	background: var(--maze-background);
+}
+.maze.shake {
+	animation: shake 0.5s;
 }
 .maze .cell {
 	display: flex;
@@ -45,7 +47,6 @@
 	aspect-ratio: 1;
 	border-radius: 50%;
 	background: #075985;
-	/* background: var(--path-background); */
 }
 .special-path {
 	width: 20px;
@@ -70,7 +71,8 @@
 	background: linear-gradient(90deg, #ef4444, #b91c1c);
 }
 .special-path.destination {
-	background: linear-gradient(90deg, #52525b, #09090b);
+	border: 2px solid white;
+	background: linear-gradient(90deg, #f43f5e, #e11d48);
 }
 .cell.top-wall-impacted {
 	border-top: var(--impacted-wall-style) !important;
@@ -86,4 +88,22 @@
 }
 .maze.hide > .cell {
 	border: 0;
+}
+
+@keyframes shake {
+	0% {
+		transform: translateX(0);
+	}
+	25% {
+		transform: translateX(5px);
+	}
+	50% {
+		transform: translateX(-5px);
+	}
+	75% {
+		transform: translateX(5px);
+	}
+	100% {
+		transform: translateX(0);
+	}
 }

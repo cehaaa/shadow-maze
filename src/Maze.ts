@@ -49,7 +49,6 @@ export class Maze {
 
 		window.addEventListener("keydown", this.movePlayer.bind(this));
 	}
-
 	createMaze() {
 		const maze: MazeType = Array.from({ length: this.height }, () =>
 			Array.from({ length: this.width }, () => new Cell())
@@ -115,9 +114,6 @@ export class Maze {
 	gameOver() {
 		this.isMoveable = false;
 		this.mazeElement.classList.remove("hide");
-		// const message = isWin ? "You Win!" : "Game Over! Try again?";
-		// alert(message);
-		// this.init();
 	}
 	checkGameState() {
 		if (this.checkIsWinTheGame()) this.gameOver();
@@ -139,7 +135,9 @@ export class Maze {
 			this.updatePlayerPosition();
 			this.drawMaze();
 		} else {
+			if (this.maze[y][x].impactedWalls[move.wall]) return;
 			this.handleCollision(x, y, newX, newY, move.wall);
+			this.addShakingEffect();
 			this.drawMaze();
 			if (this.checkIsGameOver()) this.gameOver();
 			return;
@@ -183,6 +181,12 @@ export class Maze {
 				col.drawCell();
 			}
 		}
+	}
+	addShakingEffect() {
+		this.mazeElement.classList.add("shake");
+		this.mazeElement.addEventListener("animationend", () => {
+			this.mazeElement.classList.remove("shake");
+		});
 	}
 	resetState() {
 		this.maze = [];
