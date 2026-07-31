@@ -1,15 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Vite + TS</title>
-	</head>
-	<body>
-		<div id="app">
-			<div class="maze"></div>
-		</div>
-		<script type="module" src="/src/main.ts"></script>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shadow Maze</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <div class="scene">
+        <div class="hud">
+          <div class="hud-block hud-oxygen">
+            <span class="countdown">—</span>
+          </div>
+          <div class="hud-title">
+            <span class="status"></span>
+          </div>
+          <div class="hud-block hud-lives">
+            <div class="hearts"></div>
+          </div>
+        </div>
+        <div class="maze-frame">
+          <div class="maze"></div>
+          <div class="overlay">
+            <div class="overlay-panel">
+              <span class="overlay-title"></span>
+              <button class="retry-btn" type="button">RETRY</button>
+            </div>
+          </div>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch player"></span>YOU</span>
+          <span class="legend-item"><span class="legend-swatch destination"></span>GOAL</span>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

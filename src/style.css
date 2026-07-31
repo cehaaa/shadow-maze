@@ -1,109 +1,303 @@
 :root {
-	--wall-style: 2px solid #1f2937;
-	--impacted-wall-style: 2px solid #dc2626;
-	--maze-background: #74c1e8;
+	--bg: #0d0d0d;
+	--fg: #e8e8e8;
+	--dim: #4d4d4d;
+	--player: #ff3b3b;
+	--goal: #ffd400;
+	--win: #39ff14;
+	--font: "Press Start 2P", monospace;
 }
 * {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 }
+html,
+body {
+	background: var(--bg);
+}
 #app {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	height: 100vh;
+	font-family: var(--font);
+	color: var(--fg);
 }
+
+.scene {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+}
+
+.hud {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 500px;
+}
+.hud-block {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	min-width: 70px;
+}
+.countdown {
+	font-size: 1.3rem;
+	color: var(--fg);
+}
+.countdown.warning {
+	color: var(--goal);
+}
+.countdown.critical {
+	color: var(--player);
+	animation: blink 0.5s steps(1) infinite;
+}
+
+.status {
+	font-size: 0.55rem;
+	letter-spacing: 0.05em;
+	min-height: 1em;
+	color: var(--goal);
+}
+.status.win {
+	color: var(--win);
+}
+.status.lose {
+	color: var(--player);
+}
+
+.hearts {
+	display: flex;
+	gap: 8px;
+}
+.heart {
+	--heart-color: var(--player);
+	position: relative;
+	width: 16px;
+	height: 14px;
+}
+.heart::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 2px;
+	height: 2px;
+	background: transparent;
+	box-shadow: 2px 0 var(--heart-color), 4px 0 var(--heart-color),
+		10px 0 var(--heart-color), 12px 0 var(--heart-color),
+		0 2px var(--heart-color), 2px 2px var(--heart-color),
+		4px 2px var(--heart-color), 6px 2px var(--heart-color),
+		8px 2px var(--heart-color), 10px 2px var(--heart-color),
+		12px 2px var(--heart-color), 14px 2px var(--heart-color),
+		0 4px var(--heart-color), 2px 4px var(--heart-color),
+		4px 4px var(--heart-color), 6px 4px var(--heart-color),
+		8px 4px var(--heart-color), 10px 4px var(--heart-color),
+		12px 4px var(--heart-color), 14px 4px var(--heart-color),
+		0 6px var(--heart-color), 2px 6px var(--heart-color),
+		4px 6px var(--heart-color), 6px 6px var(--heart-color),
+		8px 6px var(--heart-color), 10px 6px var(--heart-color),
+		12px 6px var(--heart-color), 14px 6px var(--heart-color),
+		2px 8px var(--heart-color), 4px 8px var(--heart-color),
+		6px 8px var(--heart-color), 8px 8px var(--heart-color),
+		10px 8px var(--heart-color), 12px 8px var(--heart-color),
+		4px 10px var(--heart-color), 6px 10px var(--heart-color),
+		8px 10px var(--heart-color), 10px 10px var(--heart-color),
+		6px 12px var(--heart-color), 8px 12px var(--heart-color);
+}
+.heart.lost {
+	--heart-color: var(--dim);
+}
+
+.maze-frame {
+	position: relative;
+	padding: 12px;
+	border: 3px solid var(--fg);
+}
+
+.legend {
+	display: flex;
+	gap: 24px;
+	font-size: 0.55rem;
+}
+.legend-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--fg);
+}
+.legend-swatch {
+	width: 10px;
+	height: 10px;
+}
+.legend-swatch.player {
+	background: var(--player);
+}
+.legend-swatch.destination {
+	background: var(--goal);
+}
+
 .maze {
+	position: relative;
 	display: grid;
 	width: 500px;
 	height: 500px;
 	grid-template-rows: repeat(7, 1fr);
 	grid-template-columns: repeat(7, 1fr);
-	background: var(--maze-background);
+	background: var(--bg);
+	overflow: hidden;
 }
 .maze.shake {
-	animation: shake 0.5s;
+	animation: shake 0.4s steps(4);
+}
+.maze.shake::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: var(--player);
+	opacity: 0;
+	animation: flash 0.3s steps(2);
+	pointer-events: none;
 }
 .maze .cell {
+	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 .cell.wall-top {
-	border-top: var(--wall-style);
+	border-top: 2px solid var(--fg);
 }
 .cell.wall-right {
-	border-right: var(--wall-style);
+	border-right: 2px solid var(--fg);
 }
 .cell.wall-down {
-	border-bottom: var(--wall-style);
+	border-bottom: 2px solid var(--fg);
 }
 .cell.wall-left {
-	border-left: var(--wall-style);
+	border-left: 2px solid var(--fg);
 }
 .cell .path {
-	width: 15px;
-	aspect-ratio: 1;
-	border-radius: 50%;
-	background: #075985;
-}
-.special-path {
-	width: 20px;
-	height: 20px;
-	border-radius: 50%;
-	position: relative;
+	width: 4px;
+	height: 4px;
+	background: var(--dim);
 }
 .special-path.player {
-	border: 2px solid white;
-	background: linear-gradient(90deg, #ef4444, #b91c1c);
-}
-.player::before {
-	content: "";
-	position: absolute;
-	border-radius: 50%;
-	width: 40%;
-	height: 40%;
-	border: 2px solid white;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	background: linear-gradient(90deg, #ef4444, #b91c1c);
+	width: 14px;
+	height: 14px;
+	background: var(--player);
 }
 .special-path.destination {
-	border: 2px solid white;
-	background: linear-gradient(90deg, #f43f5e, #e11d48);
+	width: 14px;
+	height: 14px;
+	background: var(--goal);
+	animation: blink 0.6s steps(1) infinite;
 }
 .cell.top-wall-impacted {
-	border-top: var(--impacted-wall-style) !important;
+	border-top: 2px solid var(--player) !important;
 }
 .cell.right-wall-impacted {
-	border-right: var(--impacted-wall-style) !important;
+	border-right: 2px solid var(--player) !important;
 }
 .cell.bottom-wall-impacted {
-	border-bottom: var(--impacted-wall-style) !important;
+	border-bottom: 2px solid var(--player) !important;
 }
 .cell.left-wall-impacted {
-	border-left: var(--impacted-wall-style) !important;
+	border-left: 2px solid var(--player) !important;
 }
-.maze.hide > .cell {
-	border: 0;
+.maze.hide .cell.wall-top {
+	border-top-color: transparent;
+}
+.maze.hide .cell.wall-right {
+	border-right-color: transparent;
+}
+.maze.hide .cell.wall-down {
+	border-bottom-color: transparent;
+}
+.maze.hide .cell.wall-left {
+	border-left-color: transparent;
 }
 
+.overlay {
+	position: absolute;
+	inset: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.85);
+}
+.overlay.show {
+	display: flex;
+}
+.overlay-panel {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	padding: 24px 32px;
+	border: 3px solid var(--fg);
+	background: var(--bg);
+}
+.overlay-title {
+	font-size: 0.9rem;
+	color: var(--fg);
+}
+.overlay.win .overlay-title {
+	color: var(--win);
+}
+.overlay.lose .overlay-title {
+	color: var(--player);
+}
+.retry-btn {
+	font-family: var(--font);
+	font-size: 0.6rem;
+	padding: 10px 16px;
+	border: 2px solid var(--fg);
+	background: var(--bg);
+	color: var(--fg);
+	cursor: pointer;
+}
+.retry-btn:hover {
+	background: var(--fg);
+	color: var(--bg);
+}
+
+@keyframes blink {
+	0%,
+	49% {
+		opacity: 1;
+	}
+	50%,
+	100% {
+		opacity: 0.2;
+	}
+}
 @keyframes shake {
 	0% {
 		transform: translateX(0);
 	}
 	25% {
-		transform: translateX(5px);
+		transform: translateX(4px);
 	}
 	50% {
-		transform: translateX(-5px);
+		transform: translateX(-4px);
 	}
 	75% {
-		transform: translateX(5px);
+		transform: translateX(4px);
 	}
 	100% {
 		transform: translateX(0);
+	}
+}
+@keyframes flash {
+	0% {
+		opacity: 0.3;
+	}
+	100% {
+		opacity: 0;
 	}
 }
